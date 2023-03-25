@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import os, requests, json
+import os, requests, json, time
 import create_transactions,create_merchants
 
 
@@ -19,6 +19,21 @@ def get_accounts(id):
     url = 'http://api.nessieisreal.com/customers/' + id+ '/accounts?key={}'.format(api_key)
     return json.loads(requests.get(url, headers={ 'Accept': 'application/json'}, )._content)
 
+
+
+
+
+url = "http://api.nessieisreal.com/data?type=Customers&key={}".format(api_key)
+
+payload={}
+headers = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+}
+
+response = requests.delete(url, headers=headers, data=payload)
+
+print(response.content)
 
 url = 'http://api.nessieisreal.com/customers?key={}'.format(api_key)
 payload = {
@@ -45,6 +60,7 @@ print(response.content)
 
 create_merchants.createMerchants()
 for customer in get_customers():
+    time.sleep(2)
     customer_id = customer['_id']
 
 
@@ -72,7 +88,7 @@ for customer in get_customers():
     "balance": 0,
     }
 
-    #Create Other Accounts
+    #Create Checking Account
     response = requests.post(url,data=json.dumps(payload), 
         headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
 
@@ -80,7 +96,9 @@ for customer in get_customers():
 
 
     for i in range(50):
+        time.sleep(2)
         for account in get_accounts(customer_id):
+            time.sleep(2)
             print(account)
             account_id = account['_id']
             

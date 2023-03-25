@@ -1,7 +1,7 @@
 #Create Merchants
 
 from dotenv import load_dotenv
-import os, requests, json, glob
+import os, requests, json, glob,time
 import create_transactions 
 import numpy as np
 load_dotenv()
@@ -27,6 +27,7 @@ def createMerchants():
     data = arrayMaker("./backend/*", "merchantData.txt")
 
     for i in range(15):
+        time.sleep(2)
         arr = rowSlice(data, i)
 
 

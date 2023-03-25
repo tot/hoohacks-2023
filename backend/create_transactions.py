@@ -20,7 +20,7 @@ def createDummyTransaction(api_key, id):
         "medium": "balance",
         "purchase_date": "2023-03-25",
         "amount": cost,
-        "status": "pending",
+        "status": "completed",
         "description": "filler"
     }
 
