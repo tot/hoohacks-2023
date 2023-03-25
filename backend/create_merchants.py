@@ -1,32 +1,52 @@
 #Create Merchants
 
 from dotenv import load_dotenv
-import os, requests, json
+import os, requests, json, glob
 import create_transactions 
-
-
+import numpy as np
 load_dotenv()
 api_key = os.getenv("API_KEY")
 
-url = 'http://api.nessieisreal.com/merchants?key={}'.format(api_key)
+def arrayMaker(folder, textfile):
+  for filename in glob.glob(folder):
+    name = ''.join(filename.rpartition('/')[2])
+    name = name.split("\\")
+    
+    if ((name[1]) == textfile):
+      with open(os.path.join(os.getcwd(), filename), "r") as text:
+        lines = [line.split() for line in text]
+        return lines
+      
+def rowSlice(array, index):
+  newArr = np.array(array)
+  slice = newArr[index, :]
+  return slice
 
-payload = {
-  "name": "string",
-  "category": "string",
-  "address": {
-    "street_number": "string",
-    "street_name": "string",
-    "city": "string",
-    "state": "string",
-    "zip": "string"
-  },
-  "geocode": {
-    "lat": 0,
-    "lng": 0
-  }
-}
+def createMerchants():
+    url = 'http://api.nessieisreal.com/merchants?key={}'.format(api_key)
+    data = arrayMaker("./backend/*", "merchantData.txt")
 
-response = requests.post(url,data=json.dumps(payload), 
-        headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+    for i in range(15):
+        arr = rowSlice(data, i)
 
-print(response.content)
+
+        payload = {
+        "name": arr[0],
+        "category": arr[1],
+        "address": {
+            "street_number": "123",
+            "street_name": "University Street",
+            "city": "Charlottesville",
+            "state": "VA",
+            "zip": "22308"
+        },
+        "geocode": {
+            "lat": 15,
+            "lng": 15
+        }
+        }
+
+        response = requests.post(url,data=json.dumps(payload), 
+                headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+
+        print(response.content)

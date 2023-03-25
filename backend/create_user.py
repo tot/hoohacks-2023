@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os, requests, json
-import create_transactions 
+import create_transactions,create_merchants
 
 
 load_dotenv()
@@ -14,9 +14,38 @@ def get_customers():
     headers={'Accept': 'application/json'},
     )._content)
 
+#Get List of Accounts for customer
+def get_accounts(id):
+    url = 'http://api.nessieisreal.com/customers/' + id+ '/accounts?key={}'.format(api_key)
+    return json.loads(requests.get(url, headers={ 'Accept': 'application/json'}, )._content)
+
+
+url = 'http://api.nessieisreal.com/customers?key={}'.format(api_key)
+payload = {
+  "first_name": "John",
+  "last_name": "Doe",
+  "address": {
+    "street_number": "100",
+    "street_name": "University Avenue",
+    "city": "Charlottesville",
+    "state": "VA",
+    "zip": "22901"
+  }
+}
+
+# Create User
+response = requests.post( 
+	url, 
+	data=json.dumps(payload),
+	headers={'Content-Type': 'application/json', 'Accept': 'application/json'},
+)
+print(response.content)
+
+#Create Merchants
+
+create_merchants.createMerchants()
 for customer in get_customers():
     customer_id = customer['_id']
-    print(customer_id)
 
 
     #Create Accounts
@@ -37,7 +66,7 @@ for customer in get_customers():
     print (response.content)
 
     payload = {
-    "type": "Banking Card",
+    "type": "Checking",
     "nickname": "string",
     "rewards": 0,
     "balance": 0,
@@ -50,8 +79,13 @@ for customer in get_customers():
     print (response.content)
 
 
-    #Create Transactions
-    print(create_transactions.createDummyTransaction(api_key, customer_id).content)
+    for i in range(50):
+        for account in get_accounts(customer_id):
+            print(account)
+            account_id = account['_id']
+            
+            #Create Transactions
+            print(create_transactions.createDummyTransaction(api_key, account_id).content)
 
 
 
