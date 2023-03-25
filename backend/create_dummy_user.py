@@ -1,9 +1,10 @@
-import requests
-import json
+from dotenv import load_dotenv
+import os, requests, json
 
-apiKey = '?key=9653f9fc38d2de3202bd566e6369bda3'
+load_dotenv()
+api_key = os.getenv("API_KEY")
 
-url = 'http://api.nessieisreal.com/customers{}'.format(apiKey)
+url = 'http://api.nessieisreal.com/customers?key={}'.format(api_key)
 payload = {
   "first_name": "John",
   "last_name": "Doe",
