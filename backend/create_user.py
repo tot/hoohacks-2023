@@ -31,26 +31,35 @@ for customer in get_customers():
 
 
     #Create Credit Card Account
-    response = requests.post(url,data=json.dumps(payload), 
-        headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+    #response = requests.post(url,data=json.dumps(payload), 
+        #headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
 
-    print (response.content)
+    #print (response.content)
 
     payload = {
-    "type": "Banking Card",
+    "type": "Checking",
     "nickname": "string",
     "rewards": 0,
     "balance": 0,
     }
 
     #Create Other Accounts
-    response = requests.post(url,data=json.dumps(payload), 
-        headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+    #response = requests.post(url,data=json.dumps(payload), 
+       # headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+
+    #print (response.content)
+
+
+    url = 'http://api.nessieisreal.com/accounts?key={}'.format(api_key)
+    response = requests.get(url, headers={ 'Accept': 'application/json'} )
 
     print (response.content)
 
 
     #Create Transactions
+
+
+
     print(create_transactions.createDummyTransaction(api_key, customer_id).content)
 
 
