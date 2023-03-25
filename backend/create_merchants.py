@@ -22,30 +22,31 @@ def rowSlice(array, index):
   slice = newArr[index, :]
   return slice
 
-url = 'http://api.nessieisreal.com/merchants?key={}'.format(api_key)
-data = arrayMaker("./backend/*", "merchantData.txt")
+def createMerchants():
+    url = 'http://api.nessieisreal.com/merchants?key={}'.format(api_key)
+    data = arrayMaker("./backend/*", "merchantData.txt")
 
-for i in range(15):
-    arr = rowSlice(data, i)
+    for i in range(15):
+        arr = rowSlice(data, i)
 
 
-    payload = {
-    "name": arr[0],
-    "category": arr[1],
-    "address": {
-        "street_number": "123",
-        "street_name": "University Street",
-        "city": "Charlottesville",
-        "state": "VA",
-        "zip": "22308"
-    },
-    "geocode": {
-        "lat": 15,
-        "lng": 15
-    }
-    }
+        payload = {
+        "name": arr[0],
+        "category": arr[1],
+        "address": {
+            "street_number": "123",
+            "street_name": "University Street",
+            "city": "Charlottesville",
+            "state": "VA",
+            "zip": "22308"
+        },
+        "geocode": {
+            "lat": 15,
+            "lng": 15
+        }
+        }
 
-    response = requests.post(url,data=json.dumps(payload), 
-            headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+        response = requests.post(url,data=json.dumps(payload), 
+                headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
 
-    print(response.content)
+        print(response.content)

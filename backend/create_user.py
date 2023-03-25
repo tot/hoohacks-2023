@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os, requests, json
-import create_transactions 
+import create_transactions,create_merchants
 
 
 load_dotenv()
@@ -19,13 +19,6 @@ def get_accounts(id):
     url = 'http://api.nessieisreal.com/customers/' + id+ '/accounts?key={}'.format(api_key)
     return json.loads(requests.get(url, headers={ 'Accept': 'application/json'}, )._content)
 
-
-url = 'http://api.nessieisreal.com/data?type=customers?key={}'.format(api_key)
-response = requests.delete( 
-	url, 
-	headers={ 'Accept': 'application/json'},
-)
-print(response.content)
 
 url = 'http://api.nessieisreal.com/customers?key={}'.format(api_key)
 payload = {
@@ -48,6 +41,9 @@ response = requests.post(
 )
 print(response.content)
 
+#Create Merchants
+
+create_merchants.createMerchants()
 for customer in get_customers():
     customer_id = customer['_id']
 
