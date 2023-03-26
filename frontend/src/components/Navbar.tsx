@@ -17,11 +17,11 @@ const Navbar = () => {
    const router = useRouter()
    return (
       <div className="w-full border-b border-neutral-200 bg-zinc-50 shadow">
-         <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
+         <div className="max-w-7xl mx-auto md:flex md:items-center md:justify-between p-4 space-y-4 md:space-y-0">
             <h1 className="text-neutral-900 text-xl font-semibold">
                Pennywise<span className="font-bold text-blue-500">.</span>
             </h1>
-            <div className="flex items-center space-x-4">
+            <div className="md:flex md:items-center md:space-x-4">
                {LINKS.map(({ name, slug }) => (
                   <Link key={name} href={slug}>
                      <h3

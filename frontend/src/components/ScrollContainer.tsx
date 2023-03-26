@@ -11,7 +11,7 @@ const ScrollContainer = ({ children, className }: ScrollContainerProps) => {
       <div
          className={cn(
             className,
-            "border border-neutral-300 bg-zinc-50 shadow rounded-xl overflow-y-auto divide-y divide-neutral-200"
+            "border border-neutral-300 bg-zinc-50 shadow rounded-xl overflow-y-auto divide-y divide-neutral-200 w-full"
          )}
       >
          {children}
