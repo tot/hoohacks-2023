@@ -28,7 +28,9 @@ needs customer transaction history
 '''
 @app.route('/api/overview', methods=['GET'])
 def overview():
-    return jsonify(process_data.get_overview)
+    customer_id = request.args["customer_id"]
+    process_data.process_customer_data(customer_id)
+    return jsonify([])
 
 @app.route('/api/subscriptions',methods = ['GET'])
 def subscriptions():

@@ -51,6 +51,12 @@ def get_transactions(account_id):
 	headers={'Accept': 'application/json'},
     )._content)
 
+def get_merchant_name(merchant_id):
+    return json.loads(requests.get( 
+	'http://api.nessieisreal.com/merchants/{}?key={}'.format(merchant_id, api_key),
+	headers={'Accept': 'application/json'},
+    )._content)['name']
+
 def get_merchant_category(merchant_id):
     return json.loads(requests.get( 
 	'http://api.nessieisreal.com/merchants/{}?key={}'.format(merchant_id, api_key),
@@ -76,18 +82,18 @@ def log_transactions(transactions):
         for transaction in transactions:
             t_id, m_id, b_id = transaction['_id'], transaction['merchant_id'], transaction['payer_id']
             date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
-            db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
+            db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'merchant_name': get_merchant_name(m_id), 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
 
 def process_customer_data(customer_id):
     user = db.users.find({'_id': customer_id}).next()
     last_accessed = datetime.strptime(user['last_accessed'][1:-1], '%Y-%m-%d %H:%M:%S.%f')
     if datetime.now() or datetime.now() - last_accessed > 86400:
-        db.users.update_one({'last_accessed': last_accessed}, {'$set': {'last_accessed': json.dumps(datetime.now(), indent=4, sort_keys=True, default=str)}})
         for account in get_accounts(customer_id):
             transactions = get_transactions(account['_id'])
             process_statistics(user, account, transactions)
             log_transactions(transactions)
             count_subscriptions(transactions, customer_id)
+        db.users.update_one({'_id': customer_id}, {'$set': {'last_accessed': json.dumps(datetime.now(), indent=4, sort_keys=True, default=str)}})
 
 class TimeInterval(Enum):
     ONE_YEAR = 365 * 24 * 3600
@@ -122,8 +128,8 @@ write a method that takes date stringss and returns the most recent
 def count_subscriptions(transactions, customer_id):
     for i, transaction in enumerate(transactions):
         date = transaction["purchase_date"]
-        name = transaction["merchant_name"]
         _id = transaction["merchant_id"]
+        name = get_merchant_name(_id)
         cost = transaction["amount"]
         merchants = []
         for j in range(i+1, len(transactions)):
@@ -138,7 +144,6 @@ def count_subscriptions(transactions, customer_id):
                     "last_renewal": mostRecent(date, next_date)
                 }}
                 sub_id = db["subscriptions"].update_one(q, u, upsert=True).upserted_id
-                print(sub_id)
                 if sub_id:
                     existing = db.users.find({"_id": customer_id}).next()['subscription_ids']
                     existing.append(sub_id)
