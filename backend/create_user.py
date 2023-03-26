@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import os, requests, json
+import os, requests, json, time
 import create_transactions,create_merchants
 
 
@@ -19,6 +19,18 @@ def get_accounts(id):
     url = 'http://api.nessieisreal.com/customers/' + id+ '/accounts?key={}'.format(api_key)
     return json.loads(requests.get(url, headers={ 'Accept': 'application/json'}, )._content)
 
+
+url = "http://api.nessieisreal.com/data?type=Customers&key={}".format(api_key)
+
+payload={}
+headers = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json'
+}
+
+response = requests.delete(url, headers=headers, data=payload)
+
+print(response.content)
 
 url = 'http://api.nessieisreal.com/customers?key={}'.format(api_key)
 payload = {
@@ -45,6 +57,7 @@ print(response.content)
 
 create_merchants.createMerchants()
 for customer in get_customers():
+    time.sleep(2)
     customer_id = customer['_id']
 
 
@@ -53,7 +66,7 @@ for customer in get_customers():
 
     payload = {
     "type": "Credit Card",
-    "nickname": "string",
+    "nickname": "Credit",
     "rewards": 0,
     "balance": 0,
     }
@@ -67,25 +80,25 @@ for customer in get_customers():
 
     payload = {
     "type": "Checking",
-    "nickname": "string",
+    "nickname": "Checking Account",
     "rewards": 0,
     "balance": 0,
     }
 
-    #Create Other Accounts
+    #Create Checking Account
     response = requests.post(url,data=json.dumps(payload), 
         headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
 
     print (response.content)
 
 
-    for i in range(50):
+    for i in range(10):
+        time.sleep(2)
         for account in get_accounts(customer_id):
-            print(account)
+            time.sleep(2)
             account_id = account['_id']
-            
             #Create Transactions
-            print(create_transactions.createDummyTransaction(api_key, account_id).content)
+            create_transactions.createDummyTransaction(api_key, account_id)
 
 
 

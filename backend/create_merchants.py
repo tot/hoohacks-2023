@@ -1,7 +1,7 @@
 #Create Merchants
 
 from dotenv import load_dotenv
-import os, requests, json, glob
+import os, requests, json, glob,time
 import create_transactions 
 import numpy as np
 load_dotenv()
@@ -22,11 +22,22 @@ def rowSlice(array, index):
   slice = newArr[index, :]
   return slice
 
+def call(url, payload):
+    try:
+        response = requests.post(url,data=json.dumps(payload), headers={'Content-Type': 'application/json', 'Accept': 'application/json'}, timeout=50 )
+        print(response.content)
+    except requests.exceptions.RequestException:
+        time.sleep(15)
+        call(url,payload)
+    #return response
+
 def createMerchants():
     url = 'http://api.nessieisreal.com/merchants?key={}'.format(api_key)
     data = arrayMaker("./backend/*", "merchantData.txt")
 
-    for i in range(15):
+
+    for i in range(len(data)):
+        time.sleep(2)
         arr = rowSlice(data, i)
 
 
@@ -46,7 +57,7 @@ def createMerchants():
         }
         }
 
-        response = requests.post(url,data=json.dumps(payload), 
-                headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
+        response = call(url, payload)
+        #print(response.content)
 
-        print(response.content)
+
