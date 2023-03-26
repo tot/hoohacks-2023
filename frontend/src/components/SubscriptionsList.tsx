@@ -8,7 +8,7 @@ interface SubscriptionsListProps {
 
 const SubscriptionsList = ({ subscriptions }: SubscriptionsListProps) => {
    return (
-      <div>
+      <div className="col-span-2 md:col-span-2">
          <div className="flex justify-between items-center pb-4">
             <h2 className="text-2xl text-neutral-900 font-semibold">
                Subscriptions

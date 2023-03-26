@@ -52,8 +52,10 @@ const subscriptions = [
 const Dashboard = () => {
    useEffect(() => {
       const fetchData = async () => {
-         const response = await fetch("http://127.0.0.1:5000/api/subscriptions?customer_id=6420411e78f6910a15f0e55c")
-      
+         const response = await fetch(
+            "https://{url}/api/subscriptions?customer_id=6420411e78f6910a15f0e55c"
+         )
+
          const body = await response.json()
          console.log(body)
       }
@@ -71,7 +73,7 @@ const Dashboard = () => {
          <div className="w-full relative pb-6">
             <AccountsCarousel accounts={accounts} />
          </div>
-         <div className="grid grid-cols-3 gap-6 pt-6">
+         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6">
             <SubscriptionsList subscriptions={subscriptions} />
             <div className="col-span-2">
                <div className="flex justify-between items-center pb-4">
