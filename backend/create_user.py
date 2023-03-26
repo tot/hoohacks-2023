@@ -1,11 +1,16 @@
 from dotenv import load_dotenv
 import os, requests, json, time
 import create_transactions,create_merchants
+from pymongo import MongoClient
+
 
 
 load_dotenv()
 api_key = os.getenv("API_KEY")
-
+db_url = os.getenv("DB_URL")
+db = MongoClient(db_url).admin
+users = db["users"]
+accounts = db["accounts"]
 
 #Get List of Customers
 def get_customers():
@@ -51,11 +56,12 @@ response = requests.post(
 	data=json.dumps(payload),
 	headers={'Content-Type': 'application/json', 'Accept': 'application/json'},
 )
+db.users.insert_one(json.loads(response._content)['objectCreated'])
 print(response.content)
 
 #Create Merchants
 
-create_merchants.createMerchants()
+#create_merchants.createMerchants()
 for customer in get_customers():
     time.sleep(2)
     customer_id = customer['_id']
@@ -75,7 +81,7 @@ for customer in get_customers():
     #Create Credit Card Account
     response = requests.post(url,data=json.dumps(payload), 
         headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
-
+    db.accounts.insert_one(json.loads(response._content)['objectCreated'])
     print (response.content)
 
     payload = {
@@ -88,7 +94,7 @@ for customer in get_customers():
     #Create Checking Account
     response = requests.post(url,data=json.dumps(payload), 
         headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
-
+    db.accounts.insert_one(json.loads(response._content)['objectCreated'])
     print (response.content)
 
 
