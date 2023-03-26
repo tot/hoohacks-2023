@@ -35,12 +35,13 @@ def process_statistics(user, last_accessed, account, transactions):
     current_account['last_balance'] = current_account['current_balance']
     current_account['current_balance'] = account['balance']
     for transaction in transactions:
-        category = get_merchant_category(transaction['merchant_id'])
-        categories[category] = categories.get(category, 0) + 1
-        current_account['num_purchases'] = current_account.get('num_purchases', 0) + 1
-        current_account['total_spent'] = current_account.get('total_spent', 0) + transaction['amount']
-        db['users'].update_one(user, {' $set': {'categories': categories} })
-        db['users'].update_one(user, {' $set': {account['type']: current_account}})
+        if db['txns'].count_documents({'id': transaction['_id']}, limit = 1):
+            category = get_merchant_category(transaction['merchant_id'])
+            categories[category] = categories.get(category, 0) + 1
+            current_account['num_purchases'] = current_account.get('num_purchases', 0) + 1
+            current_account['total_spent'] = current_account.get('total_spent', 0) + transaction['amount']
+            db['users'].update_one(user, {' $set': {'categories': categories} })
+            db['users'].update_one(user, {' $set': {account['type']: current_account}})
 
 def log_transactions(transactions):
     for transaction in transactions:
@@ -50,7 +51,10 @@ def log_transactions(transactions):
 
 def process_customer_data(customer_id):
     user = db['users'].query({'id': customer_id})
-    for account in get_accounts(customer_id):
-        transactions = get_transactions(account['_id'])
-        process_statistics(user, last_accessed, account, transactions)
-        log_transactions(transactions)
+    last_accessed = datetime.strptime(user['last_accessed'][1:-1], "%Y-%m-%d %H:%M:%S.%f")
+    if datetime.now() or datetime.now() - last_accessed > 86400:
+        users.update_one({'last_accessed': last_accessed}, {' $set': {'last_accessed': json.dumps(datetime.now(), indent=4, sort_keys=True, default=str)}})
+        for account in get_accounts(customer_id):
+            transactions = get_transactions(account['_id'])
+            process_statistics(user, last_accessed, account, transactions)
+            log_transactions(transactions)
