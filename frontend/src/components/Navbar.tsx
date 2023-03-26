@@ -18,7 +18,6 @@ const LINKS = [
 const Navbar = () => {
    const router = useRouter()
    const [isOpen, setOpen] = useState(false)
-   const { width } = useWindowSize()
 
    return (
       <div className="w-full border-b border-neutral-200 bg-zinc-50 shadow">
