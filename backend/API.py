@@ -17,9 +17,16 @@ client = MongoClient(db_url)
 users = client["users"]
 
 cors = CORS(app)
+'''
+frontend needs:
+needs to be able to get a dump of user stats 
+needs customer transaction history 
 
-@app.route('/test/', methods=['GET'])
+'''
+@app.route('/api/overview', methods=['GET'])
 def respond():
+    req = request.get_json()
+    customer_id = req["customer_id"]
     name = request.args.get("msg", None)
     print(f"Received: {name}")
 
@@ -112,4 +119,4 @@ def rank():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    #app.run(threaded=True, port=5000)
+    #app.run(threaded=True, port=3000)
