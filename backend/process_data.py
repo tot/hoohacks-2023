@@ -1,9 +1,13 @@
 from dotenv import load_dotenv
 from datetime import datetime
+from pymongo import MongoClient
 import os, requests, json
 
 load_dotenv()
 api_key = os.getenv('API_KEY')
+db_url = os.getenv('DB_URL')
+db = MongoClient(db_url)
+users = db['users']
 
 def get_customers():
     return json.loads(requests.get( 
