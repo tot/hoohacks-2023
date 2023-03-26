@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import os, requests, json, time
+import os, requests, json, time, datetime
 import create_transactions,create_merchants
 from pymongo import MongoClient
 
@@ -56,7 +56,10 @@ response = requests.post(
 	data=json.dumps(payload),
 	headers={'Content-Type': 'application/json', 'Accept': 'application/json'},
 )
-db.users.insert_one(json.loads(response._content)['objectCreated'])
+info = json.loads(response._content)['objectCreated']
+data = json.dumps(datetime.datetime(1,1,1,0,0,0,1), indent=4, sort_keys=True, default=str)
+newInf = {"_id": info['_id'], "account_ids": [], "last_accessed": data, "name": info['first_name'] + " " + info['last_name']}
+db.users.insert_one(newInf)
 print(response.content)
 
 #Create Merchants
@@ -81,7 +84,11 @@ for customer in get_customers():
     #Create Credit Card Account
     response = requests.post(url,data=json.dumps(payload), 
         headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
-    db.accounts.insert_one(json.loads(response._content)['objectCreated'])
+    info = json.loads(response._content)['objectCreated']
+    newInf = {"_id": info['_id'], "type": info["type"], "stats": {"last_balance": 0, "current_balance": 0, "num_transactions": 0, "total_spent":0}}
+    db.accounts.insert_one(newInf)  
+    existing =db.users.find({"_id": customer_id}).next()['account_ids']
+    db.users.update_one({"_id": customer_id}, {'$set': {"account_ids": existing + [info['_id']]}})  
     print (response.content)
 
     payload = {
@@ -94,7 +101,12 @@ for customer in get_customers():
     #Create Checking Account
     response = requests.post(url,data=json.dumps(payload), 
         headers={'Content-Type': 'application/json', 'Accept': 'application/json'} )
-    db.accounts.insert_one(json.loads(response._content)['objectCreated'])
+    info = json.loads(response._content)['objectCreated']
+    newInf = {"_id": info['_id'], "type": info["type"], "stats": {"last_balance": 0, "current_balance": 0, "num_transactions": 0, "total_spent":0}}
+    db.accounts.insert_one(newInf)
+    existing =db.users.find({"_id": customer_id}).next()['account_ids']
+    db.users.update_one({"_id": customer_id}, {'$set': {"account_ids": existing + [info['_id']]}})  
+
     print (response.content)
 
 
