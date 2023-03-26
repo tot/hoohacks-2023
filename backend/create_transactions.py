@@ -52,12 +52,3 @@ def createDummyTransaction(api_key, id):
         time.sleep(15)
         createDummyTransaction(api_key,id)
 
-for customer in get_customers():
-    customer_id = customer['_id']
-    for i in range(10):
-        time.sleep(2)
-        for account in get_accounts(customer_id):
-            time.sleep(2)
-            account_id = account['_id']
-            #Create Transactions
-            createDummyTransaction(api_key, account_id)
