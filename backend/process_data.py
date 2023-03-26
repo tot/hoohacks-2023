@@ -57,6 +57,10 @@ def log_transactions(transactions):
             date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
             db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 809ecc4641ade2f61481c8b9078aa4eff45c3635
 def process_customer_data(customer_id):
     user = db.users.find({'_id': customer_id}).next()
     last_accessed = datetime.strptime(user['last_accessed'][1:-1], '%Y-%m-%d %H:%M:%S.%f')
@@ -66,6 +70,7 @@ def process_customer_data(customer_id):
             transactions = get_transactions(account['_id'])
             process_statistics(user, account, transactions)
             log_transactions(transactions)
+            count_subscriptions(transactions)
 
 class TimeInterval(Enum):
     ONE_YEAR = 365 * 24 * 3600
@@ -104,7 +109,7 @@ def count_subscriptions(transactions):
         id = transaction["merchant_id"]
         cost = transaction["amount"]
         merchants = []
-        for j in range(i, len(transactions)):
+        for j in range(i+1, len(transactions)):
             next_date = transactions[j]["purchase_date"]
             next_name = transactions[j]["merchant_name"]
             if name not in merchants and (checkInterval(date, next_date, TimeInterval.ONE_MONTH) or checkInterval(date, next_date, TimeInterval.SIX_MONTHS) or checkInterval(date, next_date, TimeInterval.ONE_YEAR)):
