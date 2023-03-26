@@ -78,11 +78,11 @@ def process_statistics(user, account, transactions):
     db.accounts.update_one({'_id': account['_id']}, {'$set':stats})
     db.users.update_one({'_id': user['_id']}, {'$set': {'categories': categories} })
 
-def log_transactions(transactions):
+def log_transactions(customer_id, transactions):
         for transaction in transactions:
-            t_id, m_id, b_id = transaction['_id'], transaction['merchant_id'], transaction['payer_id']
+            t_id, m_id, _ = transaction['_id'], transaction['merchant_id'], transaction['payer_id']
             date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
-            db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'merchant_name': get_merchant_name(m_id), 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
+            db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'merchant_name': get_merchant_name(m_id), 'buyer_id': customer_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
 
 def process_customer_data(customer_id):
     user = db.users.find({'_id': customer_id}).next()
@@ -91,7 +91,7 @@ def process_customer_data(customer_id):
         for account in get_accounts(customer_id):
             transactions = get_transactions(account['_id'])
             process_statistics(user, account, transactions)
-            log_transactions(transactions)
+            log_transactions(customer_id, transactions)
             count_subscriptions(transactions, customer_id)
         db.users.update_one({'_id': customer_id}, {'$set': {'last_accessed': json.dumps(datetime.now(), indent=4, sort_keys=True, default=str)}})
 
