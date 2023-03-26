@@ -25,6 +25,7 @@ def get_statistics(customer_id):
     accounts = []
     for acct in db['accounts'].find({"_id": {"$in": user['account_ids']}}):
         acct['stats']['_id'] = acct['_id']
+        acct['stats']['type'] = acct['type']
         accounts.append(acct['stats'])
     return accounts
 

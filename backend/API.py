@@ -47,10 +47,10 @@ def stats():
          return jsonify({'message': 'Customer ID is missing!'}), 400
         
     customer_id = req["customer_id"]
-    return jsonify(process_data.get_stats(customer_id))
+    return jsonify(process_data.get_statistics(customer_id))
 
 @app.route('/api/transactions',methods = ['POST', 'GET'])
-def transactios():
+def transactions():
     req = request.get_json()
     if "customer_id" not in req:
          return jsonify({'message': 'Customer ID is missing!'}), 400
