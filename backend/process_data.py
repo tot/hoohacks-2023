@@ -6,8 +6,7 @@ import os, requests, json
 load_dotenv()
 api_key = os.getenv('API_KEY')
 db_url = os.getenv('DB_URL')
-db = MongoClient(db_url)
-users = db['users']
+db = MongoClient(db_url)['admin']
 
 def get_customers():
     return json.loads(requests.get( 
@@ -33,32 +32,37 @@ def get_merchant_category(merchant_id):
 	headers={'Accept': 'application/json'},
     )._content)['category']
 
-def process_statistics(user, last_accessed, account, transactions):
-    current_account = json.loads(user[account['type']])
-    categories = json.loads(user['categories'])
-    current_account['last_balance'] = current_account['current_balance']
-    current_account['current_balance'] = account['balance']
+def process_statistics(user, account, transactions):
+    categories = user['categories']
+    stats = db.accounts.find({'_id': account['_id']}).next()['stats']
+    stats['last_balance'] = stats['current_balance']
+    stats['current_balance'] = account['balance']
     for transaction in transactions:
-        if db['txns'].count_documents({'id': transaction['_id']}, limit = 1):
+        if db.txns.count_documents({'_id': transaction['_id']}, limit = 1):
             category = get_merchant_category(transaction['merchant_id'])
             categories[category] = categories.get(category, 0) + 1
-            current_account['num_purchases'] = current_account.get('num_purchases', 0) + 1
-            current_account['total_spent'] = current_account.get('total_spent', 0) + transaction['amount']
-            db['users'].update_one(user, {' $set': {'categories': categories} })
-            db['users'].update_one(user, {' $set': {account['type']: current_account}})
+            stats['num_transactions'] += 1
+            stats['total_spent'] += transaction['amount']
+    
+    db.accounts.update_one({'_id': account['_id']}, {'$set':stats})
+    db.users.update_one({'_id': user['_id']}, {'$set': {'categories': categories} })
 
 def log_transactions(transactions):
-    for transaction in transactions:
-        t_id, m_id, b_id = transaction['_id'], transaction['merchant_id'], transaction['payer_id']
-        date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
-        db['txns'].insert_one({'id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr})
+        for transaction in transactions:
+            t_id, m_id, b_id = transaction['_id'], transaction['merchant_id'], transaction['payer_id']
+            date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
+            db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
+
+def find_subcriptions():
+    pass
 
 def process_customer_data(customer_id):
-    user = db['users'].query({'id': customer_id})
-    last_accessed = datetime.strptime(user['last_accessed'][1:-1], "%Y-%m-%d %H:%M:%S.%f")
+    user = db.users.find({'_id': customer_id}).next()
+    last_accessed = datetime.strptime(user['last_accessed'][1:-1], '%Y-%m-%d %H:%M:%S.%f')
     if datetime.now() or datetime.now() - last_accessed > 86400:
-        users.update_one({'last_accessed': last_accessed}, {' $set': {'last_accessed': json.dumps(datetime.now(), indent=4, sort_keys=True, default=str)}})
+        db.users.update_one({'last_accessed': last_accessed}, {'$set': {'last_accessed': json.dumps(datetime.now(), indent=4, sort_keys=True, default=str)}})
         for account in get_accounts(customer_id):
             transactions = get_transactions(account['_id'])
-            process_statistics(user, last_accessed, account, transactions)
+            process_statistics(user, account, transactions)
             log_transactions(transactions)
+            find_subcriptions()
