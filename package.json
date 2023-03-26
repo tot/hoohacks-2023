@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "classnames": "^2.3.2",
+    "framer-motion": "^10.9.1",
+    "react-icons": "^4.8.0",
+    "react-multi-carousel": "^2.8.2"
+  }
+}
