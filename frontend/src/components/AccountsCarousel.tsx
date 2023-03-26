@@ -1,9 +1,7 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import Carousel from "react-multi-carousel"
 import "react-multi-carousel/lib/styles.css"
 import AccountCard from "./AccountCard"
-import LeftArrow from "./LeftArrow"
-import RightArrow from "./RightArrow"
 
 interface AccountsCarouselProps {
    // TODO: Type this
@@ -41,9 +39,8 @@ const AccountsCarousel = ({ accounts }: AccountsCarouselProps) => {
          renderDotsOutside
          itemClass="p-3"
          arrows={false}
-         //  customRightArrow={<RightArrow />}
-         //  customLeftArrow={<LeftArrow />}
       >
+         {/* <button onClick={() => console.log(accounts)}>lkog accs</button> */}
          {accounts.map((account) => (
             <AccountCard key={account.name} {...account} />
          ))}
