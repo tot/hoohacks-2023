@@ -58,7 +58,7 @@ response = requests.post(
 )
 info = json.loads(response._content)['objectCreated']
 data = json.dumps(datetime.datetime(1,1,1,0,0,0,1), indent=4, sort_keys=True, default=str)
-newInf = {"_id": info['_id'], "account_ids": [], "last_accessed": data, "name": info['first_name'] + " " + info['last_name']}
+newInf = {"_id": info['_id'], "account_ids": [], "last_accessed": data, "name": info['first_name'] + " " + info['last_name'], "categories": {}, "subscription_ids":[]}
 db.users.insert_one(newInf)
 print(response.content)
 
