@@ -57,9 +57,6 @@ def log_transactions(transactions):
             date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
             db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
 
-def find_subcriptions():
-    pass
-
 def process_customer_data(customer_id):
     user = db.users.find({'_id': customer_id}).next()
     last_accessed = datetime.strptime(user['last_accessed'][1:-1], '%Y-%m-%d %H:%M:%S.%f')
