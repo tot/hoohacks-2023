@@ -1,3 +1,4 @@
+from flask import jsonify
 from dotenv import load_dotenv
 from datetime import datetime
 from pymongo import MongoClient
@@ -11,6 +12,22 @@ db = MongoClient(db_url)['admin']
 users = db['users']
 subscriptions = db['subscriptions']
 
+def get_subscriptions(customer_id):
+    user = db.users.find({'_id': customer_id}).next()
+    subscriptions = [sub for sub in db['subscriptions'].find({"_id": {"$in": user['subscription_ids']}})];
+    return {'data': subscriptions}
+
+def get_statistics(customer_id):
+    user = db.users.find({'_id': customer_id}).next()
+    accounts = []
+    for acct in db['accounts'].find({"_id": {"$in": user['account_ids']}}):
+        acct['stats']['_id'] = acct['_id']
+        accounts.append(acct['stats'])
+    return {'data': accounts}
+
+def get_transactions(customer_id):
+    transactions = [t for t in db['txns'].find({"buyer_id": customer_id})];
+    return {'data': transactions}
 
 def get_customers():
     return json.loads(requests.get( 
@@ -57,10 +74,6 @@ def log_transactions(transactions):
             date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
             db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 809ecc4641ade2f61481c8b9078aa4eff45c3635
 def process_customer_data(customer_id):
     user = db.users.find({'_id': customer_id}).next()
     last_accessed = datetime.strptime(user['last_accessed'][1:-1], '%Y-%m-%d %H:%M:%S.%f')
