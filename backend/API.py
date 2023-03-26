@@ -30,32 +30,20 @@ needs customer transaction history
 def overview():
     return jsonify(process_data.get_overview)
 
-@app.route('/api/subscriptions',methods = ['POST', 'GET'])
+@app.route('/api/subscriptions',methods = ['GET'])
 def subscriptions():
-    req = request.get_json()
-    if "customer_id" not in req:
-         return jsonify({'message': 'Customer ID is missing!'}), 400
-        
-    customer_id = req["customer_id"]
-    sub_list = process_data.get_subscriptions(customer_id) 
+    customer_id = request.args["customer_id"]
+    sub_list = process_data.get_subscriptions(customer_id)
     return jsonify(sub_list)
 
-@app.route('/api/stats',methods = ['POST', 'GET'])
+@app.route('/api/stats',methods = ['GET'])
 def stats():
-    req = request.get_json()
-    if "customer_id" not in req:
-         return jsonify({'message': 'Customer ID is missing!'}), 400
-        
-    customer_id = req["customer_id"]
+    customer_id = request.args['customer_id']
     return jsonify(process_data.get_statistics(customer_id))
 
-@app.route('/api/transactions',methods = ['POST', 'GET'])
+@app.route('/api/transactions',methods = ['GET'])
 def transactions():
-    req = request.get_json()
-    if "customer_id" not in req:
-         return jsonify({'message': 'Customer ID is missing!'}), 400
-        
-    customer_id = req["customer_id"]
+    customer_id = request.args["customer_id"]
     return jsonify(process_data.get_transactions(customer_id))
 
 '''

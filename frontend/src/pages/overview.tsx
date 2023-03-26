@@ -52,8 +52,8 @@ const subscriptions = [
 const Dashboard = () => {
    useEffect(() => {
       const fetchData = async () => {
-         const response = await fetch("http://localhost:5000/api/subscriptions")
-
+         const response = await fetch("http://127.0.0.1:5000/api/subscriptions?customer_id=6420411e78f6910a15f0e55c")
+      
          const body = await response.json()
          console.log(body)
       }

@@ -123,24 +123,27 @@ def count_subscriptions(transactions, customer_id):
     for i, transaction in enumerate(transactions):
         date = transaction["purchase_date"]
         name = transaction["merchant_name"]
-        id = transaction["merchant_id"]
+        _id = transaction["merchant_id"]
         cost = transaction["amount"]
         merchants = []
         for j in range(i+1, len(transactions)):
             next_date = transactions[j]["purchase_date"]
             next_name = transactions[j]["merchant_name"]
             if name not in merchants and (checkInterval(date, next_date, TimeInterval.ONE_MONTH) or checkInterval(date, next_date, TimeInterval.SIX_MONTHS) or checkInterval(date, next_date, TimeInterval.ONE_YEAR)):
-                sub_id = db["subscriptions"].insert_one({
+                q = {"$and": [{"merchant_id": _id},{"cost": cost}]}
+                u = {"$set": {    
                     "merchant_name": next_name,
-                    "merchant_id": id,
+                    "merchant_id": _id,
                     "cost": cost,
-                    "last_renewal":mostRecent(date, next_date)
-                }).inserted_id
-
-                existing = db.users.find({"_id": customer_id}).next()['subscription_ids']
-                existing.append(sub_id)
-                db.users.update_one({"_id": customer_id}, {'$set': {"subscription_ids": existing}})  
-                merchants.append(name)
+                    "last_renewal": mostRecent(date, next_date)
+                }}
+                sub_id = db["subscriptions"].update_one(q, u, upsert=True).upserted_id
+                print(sub_id)
+                if sub_id:
+                    existing = db.users.find({"_id": customer_id}).next()['subscription_ids']
+                    existing.append(sub_id)
+                    db.users.update_one({"_id": customer_id}, {'$set': {"subscription_ids": existing}})  
+                    merchants.append(name)
                 break
 
 test_transactions = [
@@ -181,5 +184,3 @@ test_transactions = [
         "amount": 40
     }
 ]
-
-count_subscriptions(test_transactions, "641fac5778f6910a15f0e4df")
