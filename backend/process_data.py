@@ -162,36 +162,3 @@ test_transactions = [
 ]
 
 count_subscriptions(test_transactions, "641fac5778f6910a15f0e4df")
-'''
-Based on the schema where txns stands for transactions, add subscriptions by finding two transactions where the merchant_id
-is the same and the purchase_date is a datetime string that happens on the same day of the month
-txns {
-    id:str
-    mearchts_id:str
-    purchase_date 
-    amount: 
-    description
-
-}
-
-subscription
-{
-    id: str
-    merchant_name : str 
-    merchant_id: str
-    cost: str
-
-}
-
-use this format to add to a subscription
-db["subscription"].insert_one
-
-and loop through these transactions to find transaction with purchase dates on the same day of the month
-def log_transactions(transactions):
-    for transaction in transactions:
-        t_id, m_id, b_id = transaction['_id'], transaction['merchant_id'], transaction['payer_id']
-        date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
-        db['txns'].insert_one({'id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr})
-
-
-'''
