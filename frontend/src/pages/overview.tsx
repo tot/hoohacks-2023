@@ -2,6 +2,7 @@ import AccountsCarousel from "@/components/AccountsCarousel"
 import Header from "@/components/Header"
 import SubscriptionsList from "@/components/SubscriptionsList"
 import DashboardLayout from "@/layouts/DashboardLayout"
+import { useEffect } from "react"
 
 const accounts = [
    {
@@ -49,6 +50,15 @@ const subscriptions = [
 ]
 
 const Dashboard = () => {
+   useEffect(() => {
+      const fetchData = async () => {
+         const response = await fetch("http://localhost:5000/api/subscriptions")
+
+         const body = await response.json()
+         console.log(body)
+      }
+      fetchData()
+   })
    return (
       <DashboardLayout>
          <Header
