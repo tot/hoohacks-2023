@@ -14,8 +14,11 @@ subscriptions = db['subscriptions']
 
 def get_subscriptions(customer_id):
     user = db.users.find({'_id': customer_id}).next()
-    subscriptions = [sub for sub in db['subscriptions'].find({"_id": {"$in": user['subscription_ids']}})];
-    return {'data': subscriptions}
+    subscriptions = []
+    for sub in db['subscriptions'].find({"_id": {"$in": user['subscription_ids']}}):
+        sub['_id'] = str(sub['_id'])
+        subscriptions.append(sub)
+    return  subscriptions
 
 def get_statistics(customer_id):
     user = db.users.find({'_id': customer_id}).next()
@@ -23,11 +26,11 @@ def get_statistics(customer_id):
     for acct in db['accounts'].find({"_id": {"$in": user['account_ids']}}):
         acct['stats']['_id'] = acct['_id']
         accounts.append(acct['stats'])
-    return {'data': accounts}
+    return accounts
 
 def get_transactions(customer_id):
     transactions = [t for t in db['txns'].find({"buyer_id": customer_id})];
-    return {'data': transactions}
+    return transactions
 
 def get_customers():
     return json.loads(requests.get( 

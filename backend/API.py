@@ -5,7 +5,7 @@ import os
 import prompts
 import process_data
 from functools import wraps
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS, cross_origin
 from bs4 import BeautifulSoup
 from typing import List
@@ -37,7 +37,8 @@ def subscriptions():
          return jsonify({'message': 'Customer ID is missing!'}), 400
         
     customer_id = req["customer_id"]
-    return jsonify(process_data.get_subscriptions(customer_id))
+    sub_list = process_data.get_subscriptions(customer_id) 
+    return jsonify(sub_list)
 
 @app.route('/api/stats',methods = ['POST', 'GET'])
 def stats():
