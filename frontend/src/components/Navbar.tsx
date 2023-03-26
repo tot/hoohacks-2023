@@ -19,7 +19,7 @@ const Navbar = () => {
       <div className="w-full border-b border-neutral-200 bg-zinc-50 shadow">
          <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
             <h1 className="text-neutral-900 text-xl font-semibold">
-               Acme<span className="font-bold text-blue-500">.</span>
+               Pennywise<span className="font-bold text-blue-500">.</span>
             </h1>
             <div className="flex items-center space-x-4">
                {LINKS.map(({ name, slug }) => (

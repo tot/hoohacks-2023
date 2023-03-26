@@ -23,6 +23,7 @@ const SubscriptionsList = ({ subscriptions }: SubscriptionsListProps) => {
                <div key={i}>
                   <div className="flex justify-between p-4">
                      <div className="flex items-center space-x-4">
+                        {/* TODO: Replace with logo/placeholder logo */}
                         <div className="w-8 h-8 rounded-full bg-blue-500" />
                         <div>
                            <p className="text-base font-medium text-neutral-900">
