@@ -3,9 +3,9 @@ import datetime
 import requests
 import os
 import prompts
+import process_data
 from functools import wraps
 from flask import Flask, request, jsonify
-from pymongo import MongoClient
 from flask_cors import CORS, cross_origin
 from bs4 import BeautifulSoup
 from typing import List
@@ -13,8 +13,6 @@ from typing import List
 
 db_url = os.getenv("DB_URL")
 app = Flask(__name__)
-client = MongoClient(db_url)
-users = client["users"]
 
 cors = CORS(app)
 '''
@@ -22,51 +20,43 @@ frontend needs:
 needs to be able to get a dump of user stats 
 needs customer transaction history 
 
+/api/subscriptions
+/api/stats
+/api/transactions
+/api/openaistuff
+/api/recommendations
 '''
 @app.route('/api/overview', methods=['GET'])
-def respond():
+def overview():
+    return jsonify(process_data.get_overview)
+
+@app.route('/api/subscriptions',methods = ['POST', 'GET'])
+def subscriptions():
     req = request.get_json()
+    if "customer_id" not in req:
+         return jsonify({'message': 'Customer ID is missing!'}), 400
+        
     customer_id = req["customer_id"]
-    name = request.args.get("msg", None)
-    print(f"Received: {name}")
+    return jsonify(process_data.get_subscriptions(customer_id))
 
-    response = {}
+@app.route('/api/stats',methods = ['POST', 'GET'])
+def stats():
+    req = request.get_json()
+    if "customer_id" not in req:
+         return jsonify({'message': 'Customer ID is missing!'}), 400
+        
+    customer_id = req["customer_id"]
+    return jsonify(process_data.get_stats(customer_id))
 
-    if not name:
-        response["ERROR"] = "No name found. Please send a name."
+@app.route('/api/transactions',methods = ['POST', 'GET'])
+def transactios():
+    req = request.get_json()
+    if "customer_id" not in req:
+         return jsonify({'message': 'Customer ID is missing!'}), 400
+        
+    customer_id = req["customer_id"]
+    return jsonify(process_data.get_transactions(customer_id))
 
-    elif str(name).isdigit():
-        response["ERROR"] = "The name can't be numeric. Please send a string."
-    else:
-        response["MESSAGE"] = f"Your message: {name}"
-
-    return jsonify(response)
-
-@app.route('/preprocess',methods = ['POST', 'GET'])
-def preprocess():
-    query = request.get_json()['query']
-    links = request.get_json()['results']
-    titles = request.get_json()['titles']
-    if links == None or len(links) == 0:
-        return jsonify({'message': 'Links are missing!'}), 400
-    if titles == None or len(links) == 0:
-        return jsonify({'message': 'Titles are missing!'}), 400
-
-    print(request.data)
-    df = aggregate.fast_text(query, links, titles)
-    result = df.to_json(orient="split")
-    parsed = json.loads(result)
-    return json.dumps(parsed, indent=4)  
-
-@app.route('/record',methods = ['POST', 'GET'])
-def record():
-    queries = request.get_json()['query']
-    if queries == None or len(queries) == 0:
-        return jsonify({'message': 'Queries are missing!'}), 400
-
-    original = queries.pop(0)
-    aggregate.store_queries(original, queries)
-    return jsonify({'message':'success'})
 '''
 @app.route('/transactions', methods=['POST'])
 def add_transaction():

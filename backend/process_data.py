@@ -57,10 +57,6 @@ def log_transactions(transactions):
             date, amt, descr = transaction['purchase_date'], transaction['amount'], transaction['description']
             db.txns.update_one({'_id': transaction['_id']}, {'$set': {'_id': t_id, 'merchant_id': m_id, 'buyer_id': b_id, 'purchase_date': date, 'amount': amt, 'description': descr}}, upsert = True)
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 809ecc4641ade2f61481c8b9078aa4eff45c3635
 def process_customer_data(customer_id):
     user = db.users.find({'_id': customer_id}).next()
     last_accessed = datetime.strptime(user['last_accessed'][1:-1], '%Y-%m-%d %H:%M:%S.%f')
@@ -70,7 +66,7 @@ def process_customer_data(customer_id):
             transactions = get_transactions(account['_id'])
             process_statistics(user, account, transactions)
             log_transactions(transactions)
-            count_subscriptions(transactions)
+            count_subscriptions(transactions, customer_id)
 
 class TimeInterval(Enum):
     ONE_YEAR = 365 * 24 * 3600
@@ -102,7 +98,7 @@ def mostRecent(date1: str, date2: str) -> str:
 write a method that takes date stringss and returns the most recent
 '''
 
-def count_subscriptions(transactions):
+def count_subscriptions(transactions, customer_id):
     for i, transaction in enumerate(transactions):
         date = transaction["purchase_date"]
         name = transaction["merchant_name"]
@@ -113,12 +109,16 @@ def count_subscriptions(transactions):
             next_date = transactions[j]["purchase_date"]
             next_name = transactions[j]["merchant_name"]
             if name not in merchants and (checkInterval(date, next_date, TimeInterval.ONE_MONTH) or checkInterval(date, next_date, TimeInterval.SIX_MONTHS) or checkInterval(date, next_date, TimeInterval.ONE_YEAR)):
-                db["subscriptions"].insert_one({
+                sub_id = db["subscriptions"].insert_one({
                     "merchant_name": next_name,
                     "merchant_id": id,
                     "cost": cost,
                     "last_renewal":mostRecent(date, next_date)
-                })
+                }).inserted_id
+
+                existing = db.users.find({"_id": customer_id}).next()['subscription_ids']
+                existing.append(sub_id)
+                db.users.update_one({"_id": customer_id}, {'$set': {"subscription_ids": existing}})  
                 merchants.append(name)
                 break
 
@@ -161,7 +161,7 @@ test_transactions = [
     }
 ]
 
-count_subscriptions(test_transactions)
+count_subscriptions(test_transactions, "641fac5778f6910a15f0e4df")
 '''
 Based on the schema where txns stands for transactions, add subscriptions by finding two transactions where the merchant_id
 is the same and the purchase_date is a datetime string that happens on the same day of the month
