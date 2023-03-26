@@ -20,9 +20,6 @@ def get_accounts(id):
     return json.loads(requests.get(url, headers={ 'Accept': 'application/json'}, )._content)
 
 
-
-
-
 url = "http://api.nessieisreal.com/data?type=Customers&key={}".format(api_key)
 
 payload={}
@@ -69,7 +66,7 @@ for customer in get_customers():
 
     payload = {
     "type": "Credit Card",
-    "nickname": "string",
+    "nickname": "Credit",
     "rewards": 0,
     "balance": 0,
     }
@@ -83,7 +80,7 @@ for customer in get_customers():
 
     payload = {
     "type": "Checking",
-    "nickname": "string",
+    "nickname": "Checking Account",
     "rewards": 0,
     "balance": 0,
     }
@@ -95,15 +92,13 @@ for customer in get_customers():
     print (response.content)
 
 
-    for i in range(50):
+    for i in range(10):
         time.sleep(2)
         for account in get_accounts(customer_id):
             time.sleep(2)
-            print(account)
             account_id = account['_id']
-            
             #Create Transactions
-            print(create_transactions.createDummyTransaction(api_key, account_id).content)
+            create_transactions.createDummyTransaction(api_key, account_id)
 
 
 
